@@ -22,16 +22,17 @@
   :source-paths ["src"]
 
   :cljsbuild {
-    :builds [{:id "flappy-bird-demo"
-              :source-paths ["src"]
-              :figwheel true
-              :compiler {
-                         :main flappy-bird-demo.core
-                         :asset-path "js/out"
-                         :output-to "resources/public/js/flappy_bird_demo.js"
-                         :output-dir "resources/public/js/out"
-                         :source-map-timestamp true}}]}
+              :builds [{:id "flappy-bird-demo"
+                        :source-paths ["src"]
+                        :figwheel {:websocket-host :js-client-host}
+                        :compiler {
+                                   :main flappy-bird-demo.core
+                                   :asset-path "js/out"
+                                   :output-to "resources/public/js/flappy_bird_demo.js"
+                                   :output-dir "resources/public/js/out"
+                                   :source-map-timestamp true}}]}
 
-  :figwheel { :css-dirs ["resources/public/css"]
-              :open-file-command "emacsclient"
-             })
+  :figwheel {:server-ip "192.168.180.15"
+             :css-dirs ["resources/public/css"]
+
+             :open-file-command "emacsclient"})
