@@ -14,16 +14,16 @@
 (defn translate [start-pos vel time]
   (floor (+ start-pos (* time vel))))
 
-(def horiz-vel -0.15)
+(def horiz-vel -0.05) ;; -0.05 -> -0.15
 (def gravity 0.05)
-(def jump-vel 21)
+(def jump-vel 41) ;; 41 -> 31 -> 21
 (def start-y 312)
 (def bottom-y 561)
 (def flappy-x 212)
 (def flappy-width 57)
 (def flappy-height 41)
 (def pillar-spacing 324)
-(def pillar-gap 158) ;; 158
+(def pillar-gap 258) ;; 258 -> 158
 (def pillar-width 86)
 
 (def starting-state { :timer-running false
@@ -36,7 +36,7 @@
                       [{ :start-time 0
                          :pos-x 900
                          :cur-x 900
-                         :gap-top 200 }]})
+                         :gap-top 200}]})
 
 (defn reset-state [_ cur-time]
   (-> starting-state
@@ -48,7 +48,7 @@
 
 (defonce flap-state (atom starting-state))
 
-(defn curr-pillar-pos [cur-time {:keys [pos-x start-time] }]
+(defn curr-pillar-pos [cur-time {:keys [pos-x start-time]}]
   (translate pos-x horiz-vel (- cur-time start-time)))
 
 (defn in-pillar? [{:keys [cur-x]}]
@@ -94,8 +94,12 @@
 
 (defn sine-wave [st]
   (assoc st
-    :flappy-y
-    (+ start-y (* 30 (.sin js/Math (/ (:time-delta st) 300))))))
+         :flappy-y
+         (* 60 (.sin js/Math (:time-delta st)))))
+;; (+ start-y (* 60 (.sin js/Math (/ (:time-delta st) 1000))))
+;; (+ start-y (* 60 (.sin js/Math (/ (:time-delta st) 800))))
+;; (+ start-y (* 60 (.sin js/Math (/ (:time-delta st) 300))))
+;; (+ start-y (* 30 (.sin js/Math (/ (:time-delta st) 300))))
 
 (defn update-flappy [{:keys [time-delta initial-vel flappy-y jump-count] :as st}]
   (if (pos? jump-count)
@@ -105,24 +109,26 @@
                     (- bottom-y flappy-height)
                     new-y)]
       (assoc st
-        :flappy-y new-y))
-    (sine-wave st)))
+             :flappy-y new-y))
+    st))
+    ;; (sine-wave st)
 
 (defn score [{:keys [cur-time start-time] :as st}]
   (let [score (- (.abs js/Math (floor (/ (- (* (- cur-time start-time) horiz-vel) 544)
-                               pillar-spacing)))
+                                         pillar-spacing)))
                  4)]
-  (assoc st :score (if (neg? score) 0 score))))
+    (assoc st :score (if (neg? score) 0 score))))
 
 (defn time-update [timestamp state]
   (-> state
       (assoc
-          :cur-time timestamp
-          :time-delta (- timestamp (:flappy-start-time state)))
+       :cur-time timestamp
+       :time-delta (- timestamp (:flappy-start-time state)))
       update-flappy
-      update-pillars
-      collision?
-      score))
+      update-pillars))
+      ;; collision?
+      ;; score
+
 
 (defn jump [{:keys [cur-time jump-count] :as state}]
   (-> state
@@ -184,9 +190,9 @@
              [:h1.score score]
              (if-not timer-running
                [:a.start-button {:onClick #(start-game)}
-                (if (< 1 jump-count) "RESTART" "START")]
+                (if (< 1 jump-count) "REDO ART" "DO ART")]
                [:span])
-             [:div (map pillar pillar-list)]
+             ;; [:div (map pillar pillar-list)]
              [:div.flappy {:style {:top (px flappy-y)}}]
              [:div.scrolling-border {:style { :background-position-x (px border-pos)}}]]))
 
